@@ -58,8 +58,8 @@ RUN cp .env.example .env \
     && cp database/build.sqlite /opt/demo/seed.db \
     && rm database/build.sqlite .env
 
-# Remove dev deps from final image
-RUN composer install --no-dev --optimize-autoloader --classmap-authoritative
+# Remove dev deps from final image (--no-scripts because .env is gone and Laravel would try to boot)
+RUN composer install --no-dev --no-scripts --optimize-autoloader --classmap-authoritative
 
 # Docker-managed config
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
