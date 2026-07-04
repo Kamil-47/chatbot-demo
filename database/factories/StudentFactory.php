@@ -11,7 +11,7 @@ class StudentFactory extends Factory
 {
     public function definition(): array
     {
-        $pl = fake('pl_PL');
+        $pl = \Faker\Factory::create('pl_PL');
 
         $age = $this->faker->numberBetween(13, 19);
 
