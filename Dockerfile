@@ -32,9 +32,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Composer deps first (cache layer)
+# Composer deps first (cache layer) — WITH dev so Faker is available for seeding
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+RUN composer install --no-scripts --no-autoloader --prefer-dist
 
 # App source
 COPY . .
@@ -42,11 +42,10 @@ COPY . .
 # Built assets from stage 1
 COPY --from=assets /app/public/build ./public/build
 
-# Finalize composer
-RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
+# Finalize composer (with dev deps for seeding)
+RUN composer dump-autoload --optimize --classmap-authoritative
 
 # Generate seed.db during build with DEMO_MODE=true.
-# We stash it in /opt/demo (outside /database) so runtime state resets don't overwrite it.
 RUN cp .env.example .env \
     && php artisan key:generate --force \
     && sed -i 's|^DEMO_MODE=.*|DEMO_MODE=true|' .env \
@@ -58,6 +57,9 @@ RUN cp .env.example .env \
     && mkdir -p /opt/demo \
     && cp database/build.sqlite /opt/demo/seed.db \
     && rm database/build.sqlite .env
+
+# Remove dev deps from final image
+RUN composer install --no-dev --optimize-autoloader --classmap-authoritative
 
 # Docker-managed config
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
