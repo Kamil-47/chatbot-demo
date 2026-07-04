@@ -30,13 +30,16 @@ export default function ChatBot() {
         setIsLoading(true);
 
         try {
+            const csrfToken =
+                document.querySelector('meta[name="csrf-token"]')?.content ?? "";
+
             const response = await fetch("/api/chat", {
                 method: "POST",
+                credentials: "same-origin",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]',
-                    ).content,
+                    "X-CSRF-TOKEN": csrfToken,
+                    Accept: "application/json",
                 },
                 body: JSON.stringify({
                     message: inputMessage,
@@ -67,7 +70,6 @@ export default function ChatBot() {
             const assistantMessage = {
                 role: "assistant",
                 content: data.response,
-                functionResult: data.functionResult, // opcjonalnie
             };
 
             setMessages((prev) => [...prev, assistantMessage]);

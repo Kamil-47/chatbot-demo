@@ -1,4 +1,5 @@
 <x-layout>
+    @use('App\Enums\LessonStatus')
     <div class="page-header">
         <h1 class="page-title">Edytuj lekcję</h1>
         <a href="{{ route('lesson.show', $lesson->student_id) }}?month={{ $lesson->month }}" class="btn btn-primary">
@@ -31,11 +32,11 @@
             <div class="form-group">
                 <label for="status" class="form-label">Status</label>
                 <select id="status" name="status" class="form-select" required>
-                    <option value="planned" {{ $lesson->status == 'planned' ? 'selected' : '' }}>Zaplanowana
-                    </option>
-                    <option value="completed" {{ $lesson->status == 'completed' ? 'selected' : '' }}>Odbyła się
-                    </option>
-                    <option value="cancelled" {{ $lesson->status == 'cancelled' ? 'selected' : '' }}>Odwołana</option>
+                    @foreach (LessonStatus::cases() as $status)
+                        <option value="{{ $status->value }}" @selected($lesson->status === $status)>
+                            {{ $status->label() }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
 

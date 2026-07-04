@@ -1,4 +1,5 @@
 <x-layout>
+    @use('App\Enums\PaymentStatus')
     <div class="page-header">
         <h1 class="page-title">Edytuj płatność</h1>
         <a href="{{ route('payment.index') }}" class="btn btn-primary">
@@ -43,9 +44,11 @@
             <div class="form-group">
                 <label for="status" class="form-label">Status</label>
                 <select id="status" name="status" class="form-select" required>
-                    <option value="waiting" {{ $payment->status == 'waiting' ? 'selected' : '' }}>Oczekująca
-                    </option>
-                    <option value="paid" {{ $payment->status == 'paid' ? 'selected' : '' }}>Opłacona</option>
+                    @foreach (PaymentStatus::cases() as $status)
+                        <option value="{{ $status->value }}" @selected($payment->status === $status)>
+                            {{ $status->label() }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
 

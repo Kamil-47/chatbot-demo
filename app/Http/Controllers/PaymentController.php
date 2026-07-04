@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PaymentStatus;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 use Carbon\Carbon;
 
 class PaymentController extends Controller
@@ -16,20 +18,7 @@ class PaymentController extends Controller
             })
             ->orderBy('month', 'desc')
             ->get()
-            ->map(function ($payment) {
-                return [
-                    'id' => $payment->id,
-                    'student_name' => $payment->student->name,
-                    'student_price_per_lesson' => $payment->student->price_per_lesson ?? 0,
-                    'lesson_count' => $payment->lesson_count,
-                    'amount' => $payment->amount,
-                    'status' => $payment->status,
-                    'formatted_month' => Carbon::parse($payment->month)->format('F Y'),
-                    'formatted_payment_date' => $payment->payment_date
-                        ? Carbon::parse($payment->payment_date)->format('d.m.Y')
-                        : null,
-                ];
-            });
+            ->map(fn($payment) => $this->present($payment));
 
         return view('payment.index', compact('payments'));
     }
@@ -37,19 +26,7 @@ class PaymentController extends Controller
     public function show($id)
     {
         $payment = Payment::with('student')->findOrFail($id);
-
-        $paymentData = [
-            'id' => $payment->id,
-            'student_name' => $payment->student->name,
-            'student_price_per_lesson' => $payment->student->price_per_lesson ?? 0,
-            'lesson_count' => $payment->lesson_count,
-            'amount' => $payment->amount,
-            'status' => $payment->status,
-            'formatted_month' => Carbon::parse($payment->month)->format('F Y'),
-            'formatted_payment_date' => $payment->payment_date
-                ? Carbon::parse($payment->payment_date)->format('d.m.Y')
-                : null,
-        ];
+        $paymentData = $this->present($payment);
 
         return view('payment.show', compact('paymentData'));
     }
@@ -64,13 +41,15 @@ class PaymentController extends Controller
     {
         $payment = Payment::findOrFail($id);
 
-        $payment->update([
-            'month' => $request->month,
-            'lesson_count' => $request->lesson_count,
-            'amount' => $request->amount,
-            'payment_date' => $request->payment_date,
-            'status' => $request->status,
+        $data = $request->validate([
+            'month' => 'required|string|regex:/^\d{4}-\d{2}$/',
+            'lesson_count' => 'required|integer|min:0',
+            'amount' => 'required|numeric|min:0',
+            'payment_date' => 'nullable|date',
+            'status' => ['required', new Enum(PaymentStatus::class)],
         ]);
+
+        $payment->update($data);
 
         return redirect()->route('payment.index');
     }
@@ -80,25 +59,26 @@ class PaymentController extends Controller
         $payment = Payment::findOrFail($id);
 
         $payment->update([
-            'status' => 'paid',
+            'status' => PaymentStatus::Paid,
             'payment_date' => now()->format('Y-m-d'),
         ]);
 
         return redirect()->back();
     }
 
-    public function create()
+    private function present(Payment $payment): array
     {
-        return view('payment.create');
-    }
-
-    public function store(Request $request)
-    {
-        //
-    }
-
-    public function destroy($id)
-    {
-        //
+        return [
+            'id' => $payment->id,
+            'student_name' => $payment->student->name,
+            'student_price_per_lesson' => $payment->student->price_per_lesson ?? 0,
+            'lesson_count' => $payment->lesson_count,
+            'amount' => $payment->amount,
+            'status' => $payment->status,
+            'formatted_month' => Carbon::parse($payment->month)->format('F Y'),
+            'formatted_payment_date' => $payment->payment_date
+                ? Carbon::parse($payment->payment_date)->format('d.m.Y')
+                : null,
+        ];
     }
 }

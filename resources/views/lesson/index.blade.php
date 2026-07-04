@@ -40,7 +40,7 @@
                         <td>{{ $student['name'] }}</td>
                         <td>{{ $student['total'] }}</td>
                         <td>{{ $student['completed'] }}</td>
-                        <td>{{ $student['cancelled'] }}</td>
+                        <td>{{ $student['canceled'] }}</td>
                         <td>{{ $student['planned'] }}</td>
                         <td>
                             <a href="{{ route('lesson.show', $student['id']) }}?month={{ $month }}"

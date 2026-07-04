@@ -1,4 +1,5 @@
 <x-layout>
+    @use('App\Enums\PaymentStatus')
     <div class="page-header">
         <h1 class="page-title">Szczegóły płatności</h1>
         <a href="{{ route('payment.index') }}" class="btn btn-primary">
@@ -9,8 +10,8 @@
     <div class="detail-card">
         <div class="card-header">
             <h2 class="student-name">{{ $paymentData['student_name'] }}</h2>
-            <span class="payment-status status-{{ $paymentData['status'] }}">
-                {{ $paymentData['status'] }}
+            <span class="payment-status status-{{ $paymentData['status']->value }}">
+                {{ $paymentData['status']->label() }}
             </span>
         </div>
         <div class="card-body">
@@ -36,11 +37,11 @@
             </div>
             <div class="detail-row">
                 <span class="detail-label">Status:</span>
-                <span class="detail-value">{{ $paymentData['status'] }}</span>
+                <span class="detail-value">{{ $paymentData['status']->label() }}</span>
             </div>
         </div>
         <div class="card-actions">
-            @if ($paymentData['status'] == 'oczekująca')
+            @if ($paymentData['status'] === PaymentStatus::Waiting)
                 <form method="POST" action="{{ route('payment.mark-paid', $paymentData['id']) }}"
                     style="display: inline;">
                     @csrf

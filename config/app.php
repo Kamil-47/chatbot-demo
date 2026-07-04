@@ -128,8 +128,6 @@ return [
 
     //--------------------------------------------------------------------------
 
-    'providers' => ServiceProvider::defaultProviders()->merge([
-        App\Providers\RouteServiceProvider::class,
-    ])->toArray(),
+    'providers' => ServiceProvider::defaultProviders()->toArray(),
 
 ];

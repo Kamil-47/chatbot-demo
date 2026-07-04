@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
+    private const WEEKDAYS = [
+        'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+    ];
+
     public function index()
     {
         $students = Student::all();
@@ -20,27 +24,10 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        $schedule = [];
-        if ($request->has('schedule')) {
-            foreach ($request->schedule as $day => $time) {
-                if ($request->has('schedule_days') && in_array($day, $request->schedule_days) && $time) {
-                    $schedule[$day] = $time;
-                }
-            }
-        }
+        $data = $this->validated($request);
+        $data['schedule'] = $this->buildSchedule($request);
 
-        Student::create([
-            'name' => $request->name,
-            'age' => $request->age,
-            'class_number' => $request->class_number,
-            'profile' => $request->profile,
-            'current_topic' => $request->current_topic,
-            'description' => $request->description,
-            'notes' => $request->notes,
-            'next_exam_date' => $request->next_exam_date,
-            'schedule' => $schedule,
-            'price_per_lesson' => $request->price_per_lesson,
-        ]);
+        Student::create($data);
 
         return redirect()->route('student.index');
     }
@@ -61,27 +48,10 @@ class StudentController extends Controller
     {
         $student = Student::findOrFail($id);
 
-        $schedule = [];
-        if ($request->has('schedule')) {
-            foreach ($request->schedule as $day => $time) {
-                if ($request->has('schedule_days') && in_array($day, $request->schedule_days) && $time) {
-                    $schedule[$day] = $time;
-                }
-            }
-        }
+        $data = $this->validated($request);
+        $data['schedule'] = $this->buildSchedule($request);
 
-        $student->update([
-            'name' => $request->name,
-            'age' => $request->age,
-            'class_number' => $request->class_number,
-            'profile' => $request->profile,
-            'current_topic' => $request->current_topic,
-            'description' => $request->description,
-            'notes' => $request->notes,
-            'next_exam_date' => $request->next_exam_date,
-            'schedule' => $schedule,
-            'price_per_lesson' => $request->price_per_lesson,
-        ]);
+        $student->update($data);
 
         return redirect()->route('student.index');
     }
@@ -92,5 +62,35 @@ class StudentController extends Controller
         $student->delete();
 
         return redirect()->route('student.index');
+    }
+
+    private function validated(Request $request): array
+    {
+        return $request->validate([
+            'name' => 'required|string|max:255',
+            'age' => 'required|integer|min:1|max:150',
+            'class_number' => 'nullable|string|max:50',
+            'profile' => 'nullable|string|max:255',
+            'current_topic' => 'nullable|string|max:2000',
+            'description' => 'nullable|string|max:5000',
+            'notes' => 'nullable|string|max:5000',
+            'next_exam_date' => 'nullable|date',
+            'price_per_lesson' => 'nullable|numeric|min:0|max:99999.99',
+        ]);
+    }
+
+    private function buildSchedule(Request $request): array
+    {
+        $schedule = [];
+        $selectedDays = (array) $request->input('schedule_days', []);
+        $times = (array) $request->input('schedule', []);
+
+        foreach (self::WEEKDAYS as $day) {
+            if (in_array($day, $selectedDays, true) && !empty($times[$day])) {
+                $schedule[$day] = $times[$day];
+            }
+        }
+
+        return $schedule;
     }
 }

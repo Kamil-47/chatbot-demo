@@ -150,9 +150,9 @@
 
         <div class="forms-container">
             <div class="tabs">
-                <div class="tab active" onclick="showTab('login')">Logowanie</div>
+                <div class="tab active" onclick="showTab(this, 'login')">Logowanie</div>
                 @unless(config('app.demo_mode'))
-                    <div class="tab" onclick="showTab('register')">Rejestracja</div>
+                    <div class="tab" onclick="showTab(this, 'register')">Rejestracja</div>
                 @endunless
             </div>
 
@@ -241,22 +241,17 @@
     </div>
 
     <script>
-        function showTab(tabName) {
-            // Ukryj wszystkie formularze
+        function showTab(clickedTab, tabName) {
             document.querySelectorAll('.form-content').forEach(content => {
                 content.classList.remove('active');
             });
 
-            // Usuń aktywną klasę ze wszystkich tabów
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
 
-            // Pokaż wybrany formularz
             document.getElementById(tabName + '-form').classList.add('active');
-
-            // Dodaj aktywną klasę do wybranego taba
-            event.target.classList.add('active');
+            clickedTab.classList.add('active');
         }
     </script>
 </body>

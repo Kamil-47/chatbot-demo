@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LessonStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,6 +17,10 @@ class Lesson extends Model
         'time',
         'status',
         'month'
+    ];
+
+    protected $casts = [
+        'status' => LessonStatus::class,
     ];
 
     public function student()

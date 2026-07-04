@@ -13,8 +13,8 @@
                     <div class="lesson-date">
                         {{ $lesson['date'] }} - {{ $lesson['time'] }}
                     </div>
-                    <div class="lesson-status status-{{ $lesson['status'] }}">
-                        Status: {{ $lesson['status'] }}
+                    <div class="lesson-status status-{{ $lesson['status']->value }}">
+                        Status: {{ $lesson['status']->label() }}
                     </div>
                 </div>
                 <div class="card-actions">

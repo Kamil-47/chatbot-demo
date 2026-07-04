@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,6 +18,10 @@ class Payment extends Model
         'month',
         'status',
         'lesson_count'
+    ];
+
+    protected $casts = [
+        'status' => PaymentStatus::class,
     ];
 
     public function student()
