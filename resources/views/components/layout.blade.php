@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>Laravel</title>
+    @viteReactRefresh
+    @vite(['resources/css/app.css', 'resources/css/chatbot.css', 'resources/js/app.jsx'])
+    <link rel="stylesheet" href="shepherd.js/dist/css/shepherd.css" />
+    <script type="module" src="shepherd.js/dist/js/shepherd.mjs"></script>
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Korepetycje</h2>
+            </div>
+            <nav class="nav">
+                <a href="{{ route('student.index') }}"
+                    class="nav-item {{ request()->routeIs('student.*') ? 'active' : '' }}">
+                    Uczniowie
+                </a>
+                <a href="{{ route('lesson.index') }}"
+                    class="nav-item {{ request()->routeIs('lesson.*') ? 'active' : '' }}">
+                    Lekcje
+                </a>
+                <a href="{{ route('payment.index') }}"
+                    class="nav-item {{ request()->routeIs('payment.*') ? 'active' : '' }}">
+                    Płatności
+                </a>
+                <a href="{{ route('prompt.edit') }}"
+                    class="nav-item {{ request()->routeIs('prompt.*') ? 'active' : '' }}">
+                    Prompt
+                </a>
+                <button id="help-tour-btn" class="nav-item"
+                    style="background:none;border:none;cursor:pointer;width:100%;text-align:left;">
+                    Pomoc / Tour
+                </button>
+
+                <!-- Wylogowanie -->
+                <form method="POST" action="{{ route('logout') }}" style="margin-top: auto; padding: 20px;">
+                    @csrf
+                    <button type="submit" class="nav-item"
+                        style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; color: #ecf0f1;">
+                        Wyloguj się
+                    </button>
+                </form>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            @if(config('app.demo_mode'))
+                <div class="demo-banner">
+                    🎬 Środowisko demo. Dane resetują się co godzinę.
+                </div>
+            @endif
+            {{ $slot }}
+            <!-- Kontener dla chatbota -->
+            <div id="chatbot-root"></div>
+        </main>
+    </div>
+</body>
+
+</html>

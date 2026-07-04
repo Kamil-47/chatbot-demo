@@ -1,0 +1,2 @@
+# Reset demo database to seed state every hour on the hour
+0 * * * * cp /opt/demo/seed.db /var/www/html/database/app.db && chown www-data:www-data /var/www/html/database/app.db && chmod 664 /var/www/html/database/app.db
