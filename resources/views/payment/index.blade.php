@@ -1,5 +1,5 @@
+@use('App\Enums\PaymentStatus')
 <x-layout>
-    @use('App\Enums\PaymentStatus')
     <div class="page-header">
         <h1 class="page-title">Płatności</h1>
         <div class="header-actions">

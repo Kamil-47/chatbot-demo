@@ -1,5 +1,5 @@
+@use('App\Enums\PaymentStatus')
 <x-layout>
-    @use('App\Enums\PaymentStatus')
     <div class="page-header">
         <h1 class="page-title">Edytuj płatność</h1>
         <a href="{{ route('payment.index') }}" class="btn btn-primary">

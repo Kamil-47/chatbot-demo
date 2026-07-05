@@ -1,5 +1,5 @@
+@use('App\Enums\LessonStatus')
 <x-layout>
-    @use('App\Enums\LessonStatus')
     <div class="page-header">
         <h1 class="page-title">Edytuj lekcję</h1>
         <a href="{{ route('lesson.show', $lesson->student_id) }}?month={{ $lesson->month }}" class="btn btn-primary">
