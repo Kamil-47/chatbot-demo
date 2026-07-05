@@ -187,7 +187,7 @@
                 </form>
 
                 @if(config('app.demo_mode'))
-                    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center;">
+                    <div style="margin-top: 24px; padding-top: 10px; border-top: 1px solid #e5e7eb; text-align: center;">
                         <p style="color: #6b7280; font-size: 13px; margin-bottom: 12px;">— lub —</p>
                         <form method="POST" action="{{ route('login.demo') }}">
                             @csrf

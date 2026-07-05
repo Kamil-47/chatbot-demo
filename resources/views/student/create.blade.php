@@ -21,8 +21,8 @@
             </div>
 
             <div class="form-group">
-                <label for="class_number" class="form-label">Numer klasy</label>
-                <input type="text" id="class_number" name="class_number" class="form-input">
+                <label for="class_number" class="form-label">Klasa</label>
+                <input type="text" id="class_number" name="class_number" class="form-input" value="{{ old('class_number') }}">
             </div>
 
             <div class="form-group">

@@ -13,10 +13,11 @@ class StudentFactory extends Factory
     {
         $pl = \Faker\Factory::create('pl_PL');
 
-        $age = $this->faker->numberBetween(13, 19);
+        $classNumber = $this->faker->randomElement(array_keys(\App\Support\StudentClasses::CLASSES));
+        $range = \App\Support\StudentClasses::CLASSES[$classNumber];
+        $age = $this->faker->numberBetween($range['min'], $range['max']);
 
-        if ($age >= 15) {
-            $classNumber = (string) $this->faker->numberBetween(1, 3);
+        if (str_ends_with($classNumber, 'LO')) {
             $profile = $this->faker->randomElement([
                 'humanistyczna',
                 'językowa',
@@ -25,7 +26,6 @@ class StudentFactory extends Factory
                 'ogólna',
             ]);
         } else {
-            $classNumber = (string) ($age - 6);
             $profile = null;
         }
 
@@ -64,7 +64,7 @@ class StudentFactory extends Factory
                 null,
                 null,
             ]),
-            'next_exam_date' => $this->faker->dateTimeBetween('now', '+60 days')->format('Y-m-d'),
+            'next_exam_date' => $this->faker->dateTimeBetween('now', '+14 days')->format('Y-m-d'),
             'schedule' => $this->generateSchedule(),
             'price_per_lesson' => 70,
         ];

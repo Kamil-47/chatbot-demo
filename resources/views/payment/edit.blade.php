@@ -58,4 +58,13 @@
             </div>
         </form>
     </div>
+
+    <script>
+        const price = {{ (float) ($payment->student->price_per_lesson ?? 0) }};
+        const countEl = document.getElementById('lesson_count');
+        const amountEl = document.getElementById('amount');
+        countEl.addEventListener('input', () => {
+            amountEl.value = (parseInt(countEl.value || 0, 10) * price).toFixed(2);
+        });
+    </script>
 </x-layout>

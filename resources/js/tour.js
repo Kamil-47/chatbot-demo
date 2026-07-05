@@ -42,7 +42,7 @@ const studentTour = new Shepherd.Tour(defaultOptions);
 studentTour.addStep({
     id: "student-intro",
     title: "Zarządzanie studentami",
-    text: "W tej sekcji masz dostęp do wszystkich uczniów. Dodaj profil ucznia, wpisz obecny teamt, wpisuj daty sprawdzianów, rób notatki i wiele więcej.",
+    text: "W tej sekcji masz dostęp do wszystkich uczniów. Dodaj profil ucznia, wpisz obecny teamt, daty sprawdzianów, rób notatki i wiele więcej.",
     buttons: [buttons.next],
 });
 
@@ -73,7 +73,7 @@ lessonTour.addStep({
 lessonTour.addStep({
     id: "lessons-generate",
     title: "Generowanie lekcji",
-    text: 'Kliknij "Generuj lekcje", aby automatycznie utworzyć lekcje dla wszystkich uczniów na wybrany miesiąc. System korzysta z harmonogramu każdego ucznia zdefiniowanego w jego profilu. Jeśli lekcje już istniały — zostaną zastąpione nowymi. Jednocześnie automatycznie zostanie obliczona płatność za ten miesiąc.',
+    text: 'Kliknij "Generuj lekcje", aby automatycznie utworzyć lekcje dla wszystkich uczniów na wybrany miesiąc. System korzysta z harmonogramu każdego ucznia zdefiniowanego w jego profilu. Jeśli lekcje już istniały - zostaną zastąpione nowymi. Jednocześnie automatycznie zostanie obliczona płatność za ten miesiąc.',
     attachTo: {
         element: ".generate-lessons",
         on: "bottom",
@@ -95,7 +95,7 @@ lessonTour.addStep({
 lessonTour.addStep({
     id: "lessons-statuses",
     title: "Statusy lekcji",
-    text: 'Każda lekcja może mieć jeden z trzech statusów:<br><br><strong>Zaplanowana</strong> — lekcja czeka na realizację<br><strong>Odbyta</strong> — lekcja się odbyła (liczy się do płatności)<br><strong>Odwołana</strong> — lekcja nie doszła do skutku (nie liczy się do płatności)<br><br>Zmiana statusu na "odwołana" automatycznie aktualizuje kwotę płatności za dany miesiąc.',
+    text: 'Każda lekcja może mieć jeden z trzech statusów:<br><br><strong>Zaplanowana</strong> - lekcja czeka na realizację<br><strong>Odbyta</strong> - lekcja się odbyła (liczy się do płatności)<br><strong>Odwołana</strong> - lekcja nie doszła do skutku (nie liczy się do płatności)<br><br>Zmiana statusu na "odwołana" automatycznie aktualizuje kwotę płatności za dany miesiąc.',
     buttons: [buttons.back, buttons.finish],
 });
 
@@ -126,7 +126,7 @@ paymentTour.addStep({
 paymentTour.addStep({
     id: "payments-card",
     title: "Karta płatności",
-    text: "Każda karta pokazuje ucznia, liczbę lekcji, kwotę do zapłaty oraz aktualny status. Zielona lewa krawędź oznacza opłaconą płatność, czerwona — oczekującą.",
+    text: "Każda karta pokazuje ucznia, liczbę lekcji, kwotę do zapłaty oraz aktualny status. <br> Zielona lewa krawędź, oznacza opłaconą płatność, a czerwona - oczekującą.",
     attachTo: {
         element: ".payment-card",
         on: "bottom",

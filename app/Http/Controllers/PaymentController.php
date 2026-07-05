@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\PaymentStatus;
 use App\Models\Payment;
+use App\Support\DateFormat;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Enum;
 use Carbon\Carbon;
@@ -39,7 +40,7 @@ class PaymentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::with('student')->findOrFail($id);
 
         $data = $request->validate([
             'month' => 'required|string|regex:/^\d{4}-\d{2}$/',
@@ -48,6 +49,12 @@ class PaymentController extends Controller
             'payment_date' => 'nullable|date',
             'status' => ['required', new Enum(PaymentStatus::class)],
         ]);
+
+        if ((int) $data['lesson_count'] !== $payment->lesson_count
+            && abs((float) $data['amount'] - (float) $payment->amount) < 0.01) {
+            $price = $payment->student->price_per_lesson ?? 0;
+            $data['amount'] = $data['lesson_count'] * $price;
+        }
 
         $payment->update($data);
 
@@ -70,15 +77,14 @@ class PaymentController extends Controller
     {
         return [
             'id' => $payment->id,
+            'student_id' => $payment->student_id,
             'student_name' => $payment->student->name,
             'student_price_per_lesson' => $payment->student->price_per_lesson ?? 0,
             'lesson_count' => $payment->lesson_count,
             'amount' => $payment->amount,
             'status' => $payment->status,
-            'formatted_month' => Carbon::parse($payment->month)->format('F Y'),
-            'formatted_payment_date' => $payment->payment_date
-                ? Carbon::parse($payment->payment_date)->format('d.m.Y')
-                : null,
+            'formatted_month' => ucfirst(Carbon::parse($payment->month)->translatedFormat('F Y')),
+            'formatted_payment_date' => DateFormat::pl($payment->payment_date),
         ];
     }
 }

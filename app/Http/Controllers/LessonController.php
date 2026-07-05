@@ -7,6 +7,7 @@ use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Payment;
 use App\Enums\PaymentStatus;
+use App\Support\DateFormat;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Enum;
 use Carbon\Carbon;
@@ -50,7 +51,7 @@ class LessonController extends Controller
                 return [
                     'id' => $lesson->id,
                     'student_id' => $lesson->student_id,
-                    'date' => Carbon::parse($lesson->lesson_date)->format('d.m.Y'),
+                    'date' => DateFormat::pl($lesson->lesson_date),
                     'time' => $lesson->time,
                     'status' => $lesson->status,
                     'month' => $lesson->month,

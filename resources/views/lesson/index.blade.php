@@ -2,17 +2,7 @@
     <div class="page-header">
         <h1 class="page-title">Lekcje</h1>
         <div class="header-actions">
-            <form method="GET" action="{{ route('lesson.index') }}" class="filter-form month-picker">
-                <select name="month" class="form-select" onchange="this.form.submit()">
-                    <option value="">Wybierz miesiąc</option>
-                    @for ($i = 1; $i <= 12; $i++)
-                        @php $value = '2026-' . str_pad($i, 2, '0', STR_PAD_LEFT); @endphp
-                        <option value="{{ $value }}" {{ $month == $value ? 'selected' : '' }}>
-                            {{ DateTime::createFromFormat('!m', $i)->format('F') }} 2026
-                        </option>
-                    @endfor
-                </select>
-            </form>
+            <x-month-picker :action="route('lesson.index')" :selected="$month" />
             <form method="POST" action="{{ route('lesson.generate') }}" style="display: inline;"
                 class="generate-lessons">
                 @csrf
@@ -37,7 +27,7 @@
             <tbody>
                 @foreach ($studentsData as $student)
                     <tr>
-                        <td>{{ $student['name'] }}</td>
+                        <td><a href="{{ route('student.show', $student['id']) }}" class="student-link">{{ $student['name'] }}</a></td>
                         <td>{{ $student['total'] }}</td>
                         <td>{{ $student['completed'] }}</td>
                         <td>{{ $student['canceled'] }}</td>

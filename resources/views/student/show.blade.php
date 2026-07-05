@@ -33,7 +33,7 @@
             </div>
             <div class="detail-row">
                 <span class="detail-label">Data sprawdzianu:</span>
-                <span class="detail-value">{{ $student->next_exam_date ?? '[Brak danych]' }}</span>
+                <span class="detail-value">{{ \App\Support\DateFormat::pl($student->next_exam_date) ?? '[Brak danych]' }}</span>
             </div>
         </div>
         <div class="buttons-wrap">

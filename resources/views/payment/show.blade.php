@@ -8,12 +8,14 @@
     </div>
 
     <div class="detail-card">
-        <div class="card-header">
-            <h2 class="student-name">{{ $paymentData['student_name'] }}</h2>
-            <span class="payment-status status-{{ $paymentData['status']->value }}">
-                {{ $paymentData['status']->label() }}
-            </span>
-        </div>
+        <a href="{{ route('student.show', $paymentData['student_id']) }}" class="student-link">
+            <div class="card-header">
+                <h2 class="student-name">{{ $paymentData['student_name'] }}</h2>
+                <span class="payment-status status-{{ $paymentData['status']->value }}">
+                    {{ $paymentData['status']->label() }}
+                </span>
+            </div>
+        </a>
         <div class="card-body">
             <div class="detail-row">
                 <span class="detail-label">Miesiąc:</span>

@@ -12,9 +12,11 @@
         <div class="cards-container">
             @foreach ($students as $student)
                 <div class="student-card">
-                    <div class="card-header">
-                        <h2 class="student-name">{{ $student->name }} ({{ $student->age }})</h2>
-                    </div>
+                    <a href="{{ route('student.show', $student) }}" class="student-link">
+                        <div class="card-header">
+                            <h2 class="student-name">{{ $student->name }} ({{ $student->age }})</h2>
+                        </div>
+                    </a>
 
                     <div class="card-body">
                         <div class="student-info">
