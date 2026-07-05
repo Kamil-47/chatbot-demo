@@ -38,10 +38,12 @@
                     class="nav-item {{ request()->routeIs('prompt.*') ? 'active' : '' }}">
                     Prompt
                 </a>
+                @if(request()->routeIs('student.*') || request()->routeIs('lesson.*') || request()->routeIs('payment.*'))
                 <button id="help-tour-btn" class="nav-item"
                     style="background:none;border:none;cursor:pointer;width:100%;text-align:left;">
                     Pomoc / Tour
                 </button>
+                @endif
 
                 <!-- Wylogowanie -->
                 <form method="POST" action="{{ route('logout') }}" style="margin-top: auto; padding: 20px;">
