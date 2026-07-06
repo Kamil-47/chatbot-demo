@@ -48,12 +48,14 @@ export default function ChatBot() {
             });
 
             if (response.status === 429) {
+                const data = await response.json().catch(() => ({}));
                 setMessages((prev) => [
                     ...prev,
                     {
                         role: "assistant",
                         content:
-                            "Osiągnięto limit wiadomości w tej godzinie. Spróbuj ponownie za chwilę.",
+                            data.response ||
+                            "Zbyt wiele wiadomości. Spróbuj ponownie za chwilę.",
                     },
                 ]);
                 return;
