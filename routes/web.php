@@ -45,6 +45,6 @@ Route::middleware(['auth', 'isAdmin'])->group(function () {
     Route::get('/prompt/edit', [PromptController::class, 'edit'])->name('prompt.edit');
     Route::put('/prompt', [PromptController::class, 'update'])->name('prompt.update');
     Route::post('/api/chat', [ChatBotController::class, 'chat'])
-        ->middleware('throttle:20,60')
+        ->middleware('throttle:chat')
         ->name('api.chat');
 });

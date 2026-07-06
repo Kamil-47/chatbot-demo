@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\BudgetExceededException;
 use App\Models\Prompt;
 use App\Services\ChatBotService;
+use App\Services\TokenBudget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -17,8 +19,10 @@ class ChatBotController extends Controller
     // Domyślny system prompt gdy brak rekordu w tabeli prompts.
     private const DEFAULT_SYSTEM_PROMPT = 'Jesteś asystentem korepetycji. Pomagasz zarządzać uczniami, lekcjami i płatnościami. Odpowiadaj krótko i konkretnie po polsku.';
 
-    public function __construct(private ChatBotService $chatBotService)
-    {
+    public function __construct(
+        private ChatBotService $chatBotService,
+        private TokenBudget $budget,
+    ) {
     }
 
     public function chat(Request $request)
@@ -28,6 +32,7 @@ class ChatBotController extends Controller
             'conversationHistory' => 'array',
         ]);
 
+        $ip = $request->ip();
         $userMessage = $request->input('message');
 
         // Bierzemy tylko wiadomości user/assistant — role system/tool od klienta
@@ -42,8 +47,10 @@ class ChatBotController extends Controller
         ];
 
         try {
+            $this->budget->assertWithinBudget($ip);
+
             for ($iteration = 0; $iteration < self::MAX_TOOL_CALL_ITERATIONS; $iteration++) {
-                $data = $this->callOpenAI($conversationHistory);
+                $data = $this->callOpenAI($conversationHistory, $ip);
                 $message = $data['choices'][0]['message'];
 
                 if (!isset($message['tool_calls']) || count($message['tool_calls']) === 0) {
@@ -65,6 +72,14 @@ class ChatBotController extends Controller
                 'response' => 'Operacja przekroczyła dopuszczalną liczbę kroków. Spróbuj przeformułować prośbę.',
                 'conversationHistory' => $conversationHistory,
             ]);
+        } catch (BudgetExceededException $e) {
+            Log::warning('ChatBot budget exceeded', ['scope' => $e->getScope(), 'ip' => $ip]);
+
+            $response = $e->getScope() === 'global'
+                ? 'Chat tymczasowo niedostępny - ogólny limit tokenów został wyczerpany. Spóbuj ponownie później.'
+                : 'Osiągnięto dzienny limit dla Twojego adresu IP.';
+
+            return response()->json(['response' => $response], 429);
         } catch (\Exception $e) {
             Log::error('ChatBot error: ' . $e->getMessage());
 
@@ -101,7 +116,7 @@ class ChatBotController extends Controller
 
             $clean[] = ['role' => $msg['role'], 'content' => $content];
         }
-        return $clean;
+        return array_slice($clean, -20);
     }
 
     private function executeToolCall(array $toolCall): array
@@ -123,7 +138,7 @@ class ChatBotController extends Controller
         ];
     }
 
-    private function callOpenAI(array $conversationHistory): array
+    private function callOpenAI(array $conversationHistory, string $ip): array
     {
         $functions = require app_path('Services/functions.php');
 
@@ -140,7 +155,7 @@ class ChatBotController extends Controller
             ], $conversationHistory),
             'tools' => $functions,
             'tool_choice' => 'auto',
-            'max_tokens' => 1500,
+            'max_tokens' => 800,
             'temperature' => 0.7,
         ]);
 
@@ -148,7 +163,11 @@ class ChatBotController extends Controller
             throw new \Exception('OpenAI API error: ' . $response->status());
         }
 
-        return $response->json();
+        $data = $response->json();
+
+        $this->budget->record($ip, (int) ($data['usage']['total_tokens'] ?? 0));
+
+        return $data;
     }
 
     private function dispatchFunction(string $functionName, array $arguments): array
