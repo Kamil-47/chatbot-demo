@@ -12,18 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('students', function (Blueprint $table) {
-        $table->id();
-        $table->string('name');
-        $table->integer('age');
-        $table->string('class_number')->nullable();
-        $table->string('profile')->nullable();
-        $table->text('current_topic')->nullable();
-        $table->text('description')->nullable();
-        $table->text('notes')->nullable();
-        $table->date('next_exam_date')->nullable();
-        $table->json('schedule')->nullable();
-        $table->decimal('price_per_lesson', 8, 2)->nullable();
-        $table->timestamps();
+            $table->id();
+            $table->string('name');
+            $table->integer('age');
+            $table->string('class_number')->nullable();
+            $table->string('profile')->nullable();
+            $table->text('current_topic')->nullable();
+            $table->text('description')->nullable();
+            $table->text('notes')->nullable();
+            $table->date('next_exam_date')->nullable();
+            $table->json('schedule')->nullable();
+            $table->decimal('price_per_lesson', 8, 2)->nullable();
+            $table->timestamps();
         });
     }
 

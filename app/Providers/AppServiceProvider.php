@@ -18,10 +18,6 @@ class AppServiceProvider extends ServiceProvider
     {
         \Carbon\Carbon::setLocale('pl');
 
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
-        });
-
         RateLimiter::for('chat', fn (Request $request) => [
             Limit::perMinute(5)->by($request->ip()),
             Limit::perMinute(30)->by('chat-global'),

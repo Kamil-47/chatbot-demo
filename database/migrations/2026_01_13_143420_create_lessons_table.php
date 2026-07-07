@@ -10,17 +10,17 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('lessons', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('student_id')->constrained()->onDelete('cascade');
-        $table->date('lesson_date');
-        $table->time('time');
-        $table->string('status')->default('zaplanowana');
-        $table->string('month')->nullable();
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('lessons', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('student_id')->constrained()->onDelete('cascade');
+            $table->date('lesson_date');
+            $table->time('time');
+            $table->string('status')->default('zaplanowana');
+            $table->string('month')->nullable();
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

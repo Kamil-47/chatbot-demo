@@ -27,7 +27,7 @@ There's no configured linter beyond `.styleci.yml` (StyleCI, runs on the hosted 
 
 **Two separate frontends share one Laravel backend:**
 - Admin panel: server-rendered Blade views under `resources/views/{student,lesson,payment,prompt}`, backed by standard resource controllers in `app/Http/Controllers`. Protected by `auth` + `isAdmin` middleware (`app/Http/Middleware/IsAdmin.php`, aliased in `bootstrap/app.php`). Non-admin logged-in users only see `user.dashboard`.
-- Chat widget: a React app (`resources/js/components/ChatBot.jsx`, `ChatBubble.jsx`, `ChatWindow.jsx`) mounted via Vite/`app.jsx`, injected into Blade pages. It talks to a single stateless endpoint, `POST /api/chat` (`routes/api.php` → `ChatBotController@chat`), passing the full `conversationHistory` back and forth on every request (no server-side session state for the chat).
+- Chat widget: a React app (`resources/js/components/ChatBot.jsx`, `ChatBubble.jsx`, `ChatWindow.jsx`) mounted via Vite/`app.jsx`, injected into Blade pages. It talks to a single stateless endpoint, `POST /api/chat` — registered in `routes/web.php` inside the `auth`+`isAdmin` group so it rides the web session cookie and CSRF (`routes/api.php` is intentionally empty). The full `conversationHistory` is round-tripped on every request; there is no server-side chat state.
 
 **Chatbot / OpenAI function-calling flow** (the core non-obvious piece of this codebase):
 1. `ChatBotController::chat()` posts the conversation to OpenAI's `gpt-4o-mini` chat completions endpoint, along with a system prompt and a list of callable "tools".

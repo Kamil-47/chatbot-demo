@@ -7,11 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Laravel</title>
+    <title>Korepetycje</title>
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/css/chatbot.css', 'resources/js/app.jsx'])
-    <link rel="stylesheet" href="shepherd.js/dist/css/shepherd.css" />
-    <script type="module" src="shepherd.js/dist/js/shepherd.mjs"></script>
 </head>
 
 <body>
@@ -60,7 +58,7 @@
         <main class="main-content">
             @if(config('app.demo_mode'))
                 <div class="demo-banner">
-                    🎬 Środowisko demo. Dane resetują się co godzinę.
+                    🎬 Środowisko demo. Dane sesji resetują się po ~1h bezczynności.
                 </div>
             @endif
             {{ $slot }}

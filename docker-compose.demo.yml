@@ -22,4 +22,3 @@ services:
       QUEUE_CONNECTION: sync
       LOG_CHANNEL: stderr
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      TRUSTED_PROXIES: "*"

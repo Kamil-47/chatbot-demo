@@ -14,7 +14,7 @@ return [
         'type' => 'function',
         'function' => [
             'name' => 'getStudents',
-            'description' => 'Pobierz listę wszystkich uczniów z ich danymi (ID, imię, nazwisko, wiek, klasa, obecny materiał). Użyj tej funkcji gdy użytkownik pyta o uczniów lub wymienia imię ucznia.',
+            'description' => 'Pobierz listę wszystkich uczniów. Dla każdego ucznia zwraca: id, name (imię i nazwisko razem), age, class_number, profile, current_topic. Uwaga: notes i description NIE są zwracane. Użyj tej funkcji gdy użytkownik pyta o uczniów lub wymienia imię ucznia.',
             'parameters' => [
                 'type' => 'object',
                 'properties' => (object)[],

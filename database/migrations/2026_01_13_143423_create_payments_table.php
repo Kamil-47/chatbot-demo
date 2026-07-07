@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('payments', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('student_id')->constrained()->onDelete('cascade');
-        $table->decimal('amount', 8, 2);
-        $table->date('payment_date')->nullable();
-        $table->string('month');
-        $table->string('status')->default('oczekująca');
-        $table->integer('lesson_count')->nullable();
-        $table->timestamps();
-    });
+        Schema::create('payments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('student_id')->constrained()->onDelete('cascade');
+            $table->decimal('amount', 8, 2);
+            $table->date('payment_date')->nullable();
+            $table->string('month');
+            $table->string('status')->default('oczekująca');
+            $table->integer('lesson_count')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
