@@ -227,7 +227,11 @@ class ChatBotController extends Controller
     {
         $prompt = Prompt::first();
         $content = $prompt?->content ?? '';
+        $base = trim($content) !== '' ? $content : self::DEFAULT_SYSTEM_PROMPT;
 
-        return trim($content) !== '' ? $content : self::DEFAULT_SYSTEM_PROMPT;
+        $today = now()->format('Y-m-d');
+        $currentMonth = now()->format('Y-m');
+
+        return "Bieżąca data: {$today}. Bieżący miesiąc: {$currentMonth}. Gdy użytkownik pisze o \"tym miesiącu\", \"czerwcu\" bez roku itp., domyślnie użyj bieżącego roku ({$today}). Nie zgaduj innych lat.\n\n" . $base;
     }
 }

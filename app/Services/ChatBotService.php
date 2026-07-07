@@ -24,10 +24,22 @@ class ChatBotService
                 'current_topic' => $student->current_topic,
             ]);
 
+            $duplicateFirstNames = $students
+                ->map(fn($s) => mb_strtolower(explode(' ', trim($s['name']))[0] ?? ''))
+                ->filter()
+                ->countBy()
+                ->filter(fn($count) => $count > 1)
+                ->keys()
+                ->values();
+
             return [
                 'success' => true,
                 'students' => $students->toArray(),
                 'count' => $students->count(),
+                'duplicate_first_names' => $duplicateFirstNames->toArray(),
+                'ambiguity_warning' => $duplicateFirstNames->isNotEmpty()
+                    ? 'W bazie są uczniowie o tym samym imieniu (' . $duplicateFirstNames->implode(', ') . '). Jeśli użytkownik użył tylko takiego imienia bez nazwiska, ZAWSZE dopytaj którego ucznia ma na myśli, ZANIM wykonasz jakąkolwiek inną akcję.'
+                    : null,
             ];
         });
     }
