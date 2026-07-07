@@ -229,6 +229,31 @@ body {
     max-width: 600px;
 }
 
+.field-error {
+    color: #b91c1c;
+    font-size: 13px;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+.form-input.has-error,
+.form-textarea.has-error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.form-input.has-error:focus,
+.form-textarea.has-error:focus {
+    outline-color: #ef4444;
+}
+
+.schedule-group.has-error {
+    border: 1px solid #ef4444;
+    background-color: #fef2f2;
+    border-radius: 6px;
+    padding: 8px;
+}
+
 .form-section {
     margin-top: 30px;
     padding-top: 30px;

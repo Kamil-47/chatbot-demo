@@ -4,11 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class StudentController extends Controller
 {
     private const WEEKDAYS = [
         'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+    ];
+
+    private const WEEKDAY_LABELS = [
+        'monday' => 'poniedziałek',
+        'tuesday' => 'wtorek',
+        'wednesday' => 'środa',
+        'thursday' => 'czwartek',
+        'friday' => 'piątek',
+        'saturday' => 'sobota',
+        'sunday' => 'niedziela',
     ];
 
     public function index()
@@ -26,6 +37,8 @@ class StudentController extends Controller
     {
         $data = $this->validated($request);
         $data['schedule'] = $this->buildSchedule($request);
+
+        $this->assertNoScheduleConflicts($data['schedule']);
 
         Student::create($data);
 
@@ -50,6 +63,8 @@ class StudentController extends Controller
 
         $data = $this->validated($request);
         $data['schedule'] = $this->buildSchedule($request);
+
+        $this->assertNoScheduleConflicts($data['schedule'], $student->id);
 
         $student->update($data);
 
@@ -92,5 +107,47 @@ class StudentController extends Controller
         }
 
         return $schedule;
+    }
+
+    private function assertNoScheduleConflicts(array $schedule, ?int $ignoreStudentId = null): void
+    {
+        if (empty($schedule)) {
+            return;
+        }
+
+        $query = Student::query();
+        if ($ignoreStudentId !== null) {
+            $query->where('id', '!=', $ignoreStudentId);
+        }
+
+        $conflicts = [];
+        foreach ($query->get() as $other) {
+            $otherSchedule = $other->schedule ?? [];
+            foreach ($schedule as $day => $time) {
+                $otherTime = $otherSchedule[$day] ?? null;
+                if ($otherTime === null) {
+                    continue;
+                }
+                if ($this->normalizeTime($otherTime) === $this->normalizeTime($time)) {
+                    $conflicts[] = sprintf(
+                        '%s o %s jest już zajęty (%s).',
+                        ucfirst(self::WEEKDAY_LABELS[$day] ?? $day),
+                        $this->normalizeTime($time),
+                        $other->name,
+                    );
+                }
+            }
+        }
+
+        if (!empty($conflicts)) {
+            throw ValidationException::withMessages([
+                'schedule' => $conflicts,
+            ]);
+        }
+    }
+
+    private function normalizeTime(string $time): string
+    {
+        return substr($time, 0, 5);
     }
 }
