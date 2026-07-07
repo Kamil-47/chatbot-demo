@@ -1,19 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ChatBubble from "./ChatBubble";
 import ChatWindow from "./ChatWindow";
 
+const STORAGE_KEY = "chatbot-state-v1";
+
+const WELCOME_MESSAGE = {
+    role: "assistant",
+    content:
+        "Cześć! Jestem asystentem korepetycji. Mogę pomóc w zarządzaniu lekcjami, płatnościami i danymi uczniów. Co chcesz zrobić?",
+};
+
+function loadState() {
+    try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed.messages) || !Array.isArray(parsed.conversationHistory)) {
+            return null;
+        }
+        return parsed;
+    } catch {
+        return null;
+    }
+}
+
 export default function ChatBot() {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        {
-            role: "assistant",
-            content:
-                "Cześć! Jestem asystentem korepetycji. Mogę pomóc w zarządzaniu lekcjami, płatnościami i danymi uczniów. Co chcesz zrobić?",
-        },
-    ]);
-    const [conversationHistory, setConversationHistory] = useState([]);
+    const initial = loadState();
+    const [isOpen, setIsOpen] = useState(initial?.isOpen ?? false);
+    const [messages, setMessages] = useState(initial?.messages ?? [WELCOME_MESSAGE]);
+    const [conversationHistory, setConversationHistory] = useState(
+        initial?.conversationHistory ?? []
+    );
     const [inputMessage, setInputMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        try {
+            sessionStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify({ isOpen, messages, conversationHistory })
+            );
+        } catch {
+            // sessionStorage może być niedostępny (privacy mode) - ignorujemy
+        }
+    }, [isOpen, messages, conversationHistory]);
 
     const toggleChat = () => {
         setIsOpen(!isOpen);
@@ -63,12 +93,10 @@ export default function ChatBot() {
 
             const data = await response.json();
 
-            // Zaktualizuj historię konwersacji
             if (data.conversationHistory) {
                 setConversationHistory(data.conversationHistory);
             }
 
-            // Dodaj odpowiedź asystenta
             const assistantMessage = {
                 role: "assistant",
                 content: data.response,
