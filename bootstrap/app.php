@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->trustProxies(at: '*');
+        $middleware->encryptCookies(except: ['demo_sid']);
+        $middleware->web(prepend: [
+            \App\Http\Middleware\EnsureDemoSandbox::class,
+        ]);
         $middleware->alias([
             'isAdmin' => \App\Http\Middleware\IsAdmin::class,
         ]);

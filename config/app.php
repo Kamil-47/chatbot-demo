@@ -86,6 +86,7 @@ return [
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     'demo_mode' => env('DEMO_MODE', false),
+    'demo_seed_db' => env('DEMO_SEED_DB', '/opt/demo/seed.db'),
 
     /*
     |--------------------------------------------------------------------------

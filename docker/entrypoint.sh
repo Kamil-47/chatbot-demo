@@ -1,12 +1,10 @@
 #!/bin/sh
 set -e
 
-# Initialize app.db from seed.db on container start
-if [ ! -f /var/www/html/database/app.db ]; then
-    cp /opt/demo/seed.db /var/www/html/database/app.db
-fi
-chown www-data:www-data /var/www/html/database/app.db
-chmod 664 /var/www/html/database/app.db
+# Prepare sandbox directory for per-session SQLite copies
+mkdir -p /var/www/html/database/sandbox
+chown www-data:www-data /var/www/html/database/sandbox
+chmod 775 /var/www/html/database/sandbox
 
 # Warm caches for production performance
 cd /var/www/html
