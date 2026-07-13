@@ -54,7 +54,7 @@ class StudentFactory extends Factory
                 'Przygotowuje się do egzaminu ósmoklasisty.',
                 'Przygotowuje się do matury rozszerzonej.',
                 'Sumienny uczeń, regularnie odrabia zadane prace.',
-                'Wymaga wielu powtórek — słabo utrwala materiał między zajęciami.',
+                'Wymaga wielu powtórek - słabo utrwala materiał między zajęciami.',
             ]),
             'notes' => $this->faker->randomElement([
                 'Rodzice proszą o SMS przed zajęciami.',

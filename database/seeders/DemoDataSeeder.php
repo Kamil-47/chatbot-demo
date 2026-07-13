@@ -10,14 +10,25 @@ use Illuminate\Database\Seeder;
 
 class DemoDataSeeder extends Seeder
 {
+    private const NAMES = [
+        'Anna Kowalska',
+        'Anna Nowak',
+        'Katarzyna Wójcik',
+        'Magdalena Kaczmarek',
+        'Jan Kowalczyk',
+        'Piotr Kamiński',
+        'Michał Lewandowski',
+        'Tomasz Zieliński',
+        'Karol Szymański',
+    ];
+
     public function run(): void
     {
-        $students = Student::factory()->count(9)->create();
-
         $currentMonth = now()->format('Y-m');
         $previousMonth = now()->subMonth()->format('Y-m');
 
-        foreach ($students as $student) {
+        foreach (self::NAMES as $name) {
+            $student = Student::factory()->create(['name' => $name]);
             $this->seedMonth($student, $previousMonth, isPrevious: true);
             $this->seedMonth($student, $currentMonth, isPrevious: false);
         }
