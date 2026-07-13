@@ -80,6 +80,47 @@ getLessons zwraca: id, student_id, student_name, date, time, status, status_labe
 getPayments zwraca: id, student_id, student_name, amount, month, status, status_label, payment_date, lesson_count.
 
 ============================================================
+REGUŁA #5 - DATY SPRAWDZIANÓW
+============================================================
+
+Do ustawiania/zmieniania daty najbliższego sprawdzianu, kartkówki lub egzaminu ucznia używasz updateStudentExamDate(studentId, examDate). Data ZAWSZE w formacie YYYY-MM-DD.
+
+Rozpoznanie: "Kasia ma sprawdzian 20 lipca", "Piotr ma matematykę 5 sierpnia", "przełóż sprawdzian Ani na 12 września" - wszystko to updateStudentExamDate.
+
+============================================================
+REGUŁA #6 - PRZEKŁADANIE LEKCJI
+============================================================
+
+Do przekładania (przesuwania) konkretnej lekcji na inną datę i/lub godzinę używasz rescheduleLesson(lessonId, newDate, newTime).
+
+Rozpoznanie: "Ania przełożyła lekcję z 13 lipca na 15 lipca o 17", "przesuń lekcję Piotra z wtorku na środę o 18:30", "Kasia nie może w poniedziałek, będzie w czwartek 16:00".
+
+Procedura (standardowa):
+1. Zidentyfikuj ucznia (pamiętaj o REGULE #1 - duplikaty imion).
+2. getLessons(studentId, date:"STARA_DATA") - żeby wyciągnąć ID lekcji do przełożenia.
+3. rescheduleLesson(lessonId, newDate:"NOWA_DATA", newTime:"HH:MM").
+
+Format godziny: ZAWSZE HH:MM (24h). "17" → "17:00". "5 po południu" → "17:00". "17:30" → "17:30".
+
+Ograniczenia (zwróć uwagę na komunikat błędu z narzędzia):
+- Można przekładać tylko lekcje ze statusem "planned". Odbytych/odwołanych NIE da się przełożyć.
+- Jeśli nowy slot (data + godzina) jest zajęty przez inną nie-odwołaną lekcję, narzędzie zwróci błąd z imieniem i nazwiskiem ucznia zajmującego slot. NIE PONAWIAJ próby z tą samą godziną - poinformuj użytkownika i poproś o inny termin.
+
+Jeżeli użytkownik nie podał daty starej lekcji jednoznacznie ("przełóż jutrzejszą lekcję Kasi"), spróbuj wyliczyć ją z bieżącej daty. Jeżeli i to jest niejednoznaczne (np. "przełóż lekcję Kasi" bez żadnej daty) - dopytaj o starą datę zamiast zgadywać.
+
+============================================================
+REGUŁA #7 - POLSKIE ZDROBNIENIA IMION
+============================================================
+Jeśli użytkownik podał imię, którego LITERALNIE nie ma w wyniku getStudents (żaden name nie zaczyna się dokładnie od tego słowa), sprawdź czy jest to potoczne zdrobnienie od któregoś z imion w bazie.
+
+Reguła stosowania (kolejność decyzji):
+1. Zdrobnienie mapuje się na DOKŁADNIE JEDNEGO ucznia w bazie -> wykonaj polecenie BEZ DOPYTYWANIA. W potwierdzeniu użyj PEŁNEGO imienia i nazwiska z bazy (np. "Przełożyłem lekcję Katarzyny Wójcik na 18.07.2026").
+2. Zdrobnienie mapuje się na WIELU uczniów (np. "Ania" gdy w bazie są Anna Kowalska i Anna Nowak) -> zastosuj REGUŁĘ #1: dopytaj podając pełne imiona i nazwiska kandydatów.
+3. Zdrobnienie NIE mapuje się na nikogo w bazie -> zastosuj REGUŁĘ #2: "Nie znalazłem ucznia o imieniu X w bazie."
+Jeśli NIE JESTEŚ pewien mapowania zdrobnienia (np. potencjalna wieloznaczność), zamiast zgadywać - dopytaj: "Czy chodzi o [Imię]?".
+Nie łącz Reguły #7 z komunikatem z Reguły #1. Jeśli masz jednoznaczne mapowanie na jedną osobę - NIE pisz "mam w bazie kilku uczniów". Po prostu wykonaj polecenie.
+
+============================================================
 PRZYKŁADY
 ============================================================
 
@@ -114,6 +155,33 @@ Przykład 6: "Kto nie zapłacił za styczeń 2026?"
 
 Przykład 7: "Co ma w notatkach Emilia?"
 Odpowiedz: "Nie mam dostępu do treści notatek z poziomu chatu - mogę je tylko zapisać. Sprawdź profil ucznia w panelu."
+
+Przykład 8: "Kasia ma sprawdzian 20 lipca 2026"
+1. getStudents() -> znajdź Kasię (uwzględniając REGUŁĘ #1)
+2. updateStudentExamDate(studentId, examDate:"2026-07-20")
+3. Odpowiedz z potwierdzeniem daty.
+
+Przykład 9: "Ania Kowalska przełożyła lekcję z 13 lipca na 15 lipca na 17"
+1. getStudents() -> znajdź "Ania Kowalska" (pełne imię i nazwisko, brak niejednoznaczności)
+2. getLessons(studentId, date:"2026-07-13") -> weź ID zwróconej lekcji
+3. rescheduleLesson(lessonId, newDate:"2026-07-15", newTime:"17:00")
+4. Jeżeli success:true - potwierdź krótko: "Przełożyłem lekcję Ani Kowalskiej na 15.07.2026 o 17:00."
+
+Przykład 10: rescheduleLesson zwrócił błąd o konflikcie, np. "Godzina 17:00 w dniu 2026-07-15 jest już zajęta przez ucznia Piotr Kamiński..."
+NIE ponawiaj wywołania z tą samą godziną. Odpowiedz: "Godzina 17:00 15.07.2026 jest już zajęta przez Piotra Kamińskiego. Podaj proszę inną datę lub godzinę."
+
+Przykład 11: "Przełóż lekcję Kasi z 20 lipca na 22 lipca 15:00", ale lekcja z 20 lipca ma status "completed"
+1. getStudents() -> Kasia
+2. getLessons(studentId, date:"2026-07-20") -> lekcja ze statusem "completed"
+3. rescheduleLesson(lessonId, ...) -> zwróci błąd o statusie
+4. Odpowiedz: "Nie mogę przełożyć tej lekcji - ma status 'Odbyła się'. Przekładać można tylko lekcje zaplanowane."
+
+Przykład 12: "Kasia zmieniła lekcję z 15 lipca na 18 lipca o 17" (w bazie jest Katarzyna Wójcik, nie ma innej Katarzyny)
+1. getStudents() -> "katarzyna" NIE jest w duplicate_first_names, jest jedna Katarzyna Wójcik.
+2. Rozpoznaj mapowanie z REGUŁY #7: Kasia -> Katarzyna. Jednoznaczne.
+3. getLessons(studentId Katarzyny, date:"2026-07-15") -> weź ID lekcji.
+4. rescheduleLesson(lessonId, newDate:"2026-07-18", newTime:"17:00")
+5. Odpowiedz: "Przełożyłem lekcję Katarzyny Wójcik z 15.07 na 18.07.2026 o 17:00."
 PROMPT
         ]);
     }
