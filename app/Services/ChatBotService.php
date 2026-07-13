@@ -7,11 +7,16 @@ use App\Enums\PaymentStatus;
 use App\Models\Lesson;
 use App\Models\Payment;
 use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ChatBotService
 {
+    public function __construct(private LessonPaymentSync $paymentSync)
+    {
+    }
+
     public function getStudents(): array
     {
         return $this->runSafely('pobieranie uczniów', function () {
@@ -206,6 +211,129 @@ class ChatBotService
     public function updateStudentDescription(int $studentId, string $description): array
     {
         return $this->updateStudentField($studentId, 'description', $description, 'opis');
+    }
+
+    public function updateStudentExamDate(int $studentId, string $examDate): array
+    {
+        if (!$this->isValidYmd($examDate)) {
+            return [
+                'success' => false,
+                'message' => 'Nieprawidłowa data. Wymagany format: YYYY-MM-DD (kalendarzowo poprawna).',
+            ];
+        }
+
+        return $this->updateStudentField($studentId, 'next_exam_date', $examDate, 'data sprawdzianu');
+    }
+
+    public function rescheduleLesson(int $lessonId, string $newDate, string $newTime): array
+    {
+        return $this->runSafely('przekładanie lekcji', function () use ($lessonId, $newDate, $newTime) {
+            if (!$this->isValidYmd($newDate)) {
+                return [
+                    'success' => false,
+                    'message' => 'Nieprawidłowa data. Wymagany format: YYYY-MM-DD (kalendarzowo poprawna).',
+                ];
+            }
+
+            $normalizedTime = substr(trim($newTime), 0, 5);
+            if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $normalizedTime)) {
+                return [
+                    'success' => false,
+                    'message' => 'Nieprawidłowa godzina. Wymagany format: HH:MM (24h, 00:00 - 23:59).',
+                ];
+            }
+
+            $lesson = Lesson::with('student')->find($lessonId);
+            if (!$lesson) {
+                return [
+                    'success' => false,
+                    'message' => "Nie znaleziono lekcji o ID: {$lessonId}",
+                ];
+            }
+
+            if ($lesson->status !== LessonStatus::Planned) {
+                return [
+                    'success' => false,
+                    'message' => "Można przekładać tylko lekcje zaplanowane. Ta lekcja ma status: {$lesson->status->label()}.",
+                ];
+            }
+
+            $student = $lesson->student;
+            if (!$student) {
+                return [
+                    'success' => false,
+                    'message' => 'Uczeń przypisany do tej lekcji nie istnieje.',
+                ];
+            }
+
+            // Konflikt: inna nie-odwołana lekcja na tej samej dacie i godzinie.
+            $conflict = Lesson::where('lesson_date', $newDate)
+                ->where('time', $normalizedTime)
+                ->where('status', '!=', LessonStatus::Canceled)
+                ->where('id', '!=', $lessonId)
+                ->with('student')
+                ->first();
+
+            if ($conflict) {
+                $conflictName = $conflict->student?->name ?? 'inny uczeń';
+                return [
+                    'success' => false,
+                    'message' => "Godzina {$normalizedTime} w dniu {$newDate} jest już zajęta przez ucznia {$conflictName}. Podaj inną datę lub godzinę.",
+                ];
+            }
+
+            $oldDate = $lesson->lesson_date;
+            $oldTime = $lesson->time;
+            $oldMonth = $lesson->month;
+            $newMonth = Carbon::parse($newDate)->format('Y-m');
+
+            $lesson->update([
+                'lesson_date' => $newDate,
+                'time' => $normalizedTime,
+                'month' => $newMonth,
+            ]);
+
+            $this->paymentSync->syncMonth($student, $newMonth);
+            if ($oldMonth !== $newMonth) {
+                $this->paymentSync->syncMonth($student, $oldMonth);
+            }
+
+            Log::info('ChatBot: przełożenie lekcji', [
+                'lesson_id' => $lessonId,
+                'old_date' => $oldDate,
+                'old_time' => $oldTime,
+                'new_date' => $newDate,
+                'new_time' => $normalizedTime,
+                'student_id' => $student->id,
+            ]);
+
+            return [
+                'success' => true,
+                'message' => "Lekcja przełożona z {$oldDate} {$oldTime} na {$newDate} {$normalizedTime}.",
+                'lesson' => [
+                    'id' => $lesson->id,
+                    'student' => $student->name,
+                    'date' => $lesson->lesson_date,
+                    'time' => $lesson->time,
+                    'status' => $lesson->status->value,
+                ],
+            ];
+        }, ['lesson_id' => $lessonId]);
+    }
+
+    /**
+     * Sprawdza czy string jest kalendarzowo poprawną datą YYYY-MM-DD.
+     * Odrzuca m.in. "2026-13-45" (rolluje na 2027) i "2026-02-30" (rolluje na 2026-03-02).
+     */
+    private function isValidYmd(string $date): bool
+    {
+        try {
+            $parsed = Carbon::createFromFormat('Y-m-d', $date);
+        } catch (Throwable) {
+            return false;
+        }
+
+        return $parsed !== false && $parsed->format('Y-m-d') === $date;
     }
 
     private function updateStudentField(int $studentId, string $field, string $value, string $friendlyName): array

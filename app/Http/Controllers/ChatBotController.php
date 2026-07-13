@@ -156,7 +156,7 @@ class ChatBotController extends Controller
             'tools' => $functions,
             'tool_choice' => 'auto',
             'max_tokens' => 800,
-            'temperature' => 0.7,
+            'temperature' => 0.2,
         ]);
 
         if (!$response->successful()) {
@@ -204,6 +204,15 @@ class ChatBotController extends Controller
                 'updateStudentDescription' => $this->chatBotService->updateStudentDescription(
                     $arguments['studentId'],
                     $arguments['description'],
+                ),
+                'updateStudentExamDate' => $this->chatBotService->updateStudentExamDate(
+                    $arguments['studentId'],
+                    $arguments['examDate'],
+                ),
+                'rescheduleLesson' => $this->chatBotService->rescheduleLesson(
+                    $arguments['lessonId'],
+                    $arguments['newDate'],
+                    $arguments['newTime'],
                 ),
                 default => [
                     'success' => false,

@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\LessonStatus;
 use App\Models\Lesson;
 use App\Models\Student;
-use App\Models\Payment;
-use App\Enums\PaymentStatus;
+use App\Services\LessonPaymentSync;
 use App\Support\DateFormat;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Enum;
@@ -14,6 +13,10 @@ use Carbon\Carbon;
 
 class LessonController extends Controller
 {
+    public function __construct(private LessonPaymentSync $paymentSync)
+    {
+    }
+
     public function index(Request $request)
     {
         $month = $request->month;
@@ -87,12 +90,12 @@ class LessonController extends Controller
             'month' => $newMonth,
         ]);
 
-        $this->updatePaymentForLesson($lesson);
+        $this->paymentSync->syncMonth($lesson->student, $newMonth);
 
         // Jeżeli lekcja przeniesiona do innego miesiąca — zsynchronizuj też stary miesiąc,
         // bo lekcja została w nim policzona przed zmianą.
         if ($oldMonth !== $newMonth) {
-            $this->syncPaymentTotals($lesson->student, $oldMonth);
+            $this->paymentSync->syncMonth($lesson->student, $oldMonth);
         }
 
         return redirect()->route('lesson.show', $lesson->student_id)
@@ -161,48 +164,6 @@ class LessonController extends Controller
             }
         }
 
-        $this->syncPaymentTotals($student, $month);
-    }
-
-    /**
-     * Aktualizuje sumę do zapłaty na podstawie lekcji aktywnych (nie-odwołanych).
-     */
-    private function syncPaymentTotals(Student $student, string $month): void
-    {
-        $activeLessons = Lesson::where('student_id', $student->id)
-            ->where('month', $month)
-            ->where('status', '!=', LessonStatus::Canceled)
-            ->count();
-
-        $amount = $activeLessons * ($student->price_per_lesson ?? 0);
-
-        $payment = Payment::where('student_id', $student->id)
-            ->where('month', $month)
-            ->first();
-
-        if ($payment) {
-            $payment->update([
-                'lesson_count' => $activeLessons,
-                'amount' => $amount,
-            ]);
-        } else {
-            Payment::create([
-                'student_id' => $student->id,
-                'month' => $month,
-                'lesson_count' => $activeLessons,
-                'amount' => $amount,
-                'status' => PaymentStatus::Waiting,
-            ]);
-        }
-    }
-
-    private function updatePaymentForLesson(Lesson $lesson): void
-    {
-        $student = Student::find($lesson->student_id);
-        if (!$student) {
-            return;
-        }
-
-        $this->syncPaymentTotals($student, $lesson->month);
+        $this->paymentSync->syncMonth($student, $month);
     }
 }

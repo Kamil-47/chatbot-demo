@@ -190,5 +190,53 @@ return [
                 'required' => ['studentId', 'description'],
             ]
         ]
+    ],
+
+    [
+        'type' => 'function',
+        'function' => [
+            'name' => 'updateStudentExamDate',
+            'description' => 'Ustaw datę najbliższego sprawdzianu/kartkówki/egzaminu ucznia. Użyj gdy użytkownik informuje o zbliżającym się sprawdzianie, zmianie terminu egzaminu itp.',
+            'parameters' => [
+                'type' => 'object',
+                'properties' => [
+                    'studentId' => [
+                        'type' => 'integer',
+                        'description' => 'ID ucznia'
+                    ],
+                    'examDate' => [
+                        'type' => 'string',
+                        'description' => 'Data sprawdzianu w formacie YYYY-MM-DD'
+                    ]
+                ],
+                'required' => ['studentId', 'examDate'],
+            ]
+        ]
+    ],
+
+    [
+        'type' => 'function',
+        'function' => [
+            'name' => 'rescheduleLesson',
+            'description' => 'Przełóż istniejącą, zaplanowaną lekcję na inną datę i godzinę. Użyj gdy użytkownik informuje że lekcja została przełożona/przesunięta na inny termin. UWAGA: działa tylko na lekcjach ze statusem "planned". Aby zidentyfikować lekcję, najpierw wywołaj getLessons z filtrem po studentId i date (starej dacie), żeby wyciągnąć jej ID. Jeśli nowa godzina jest już zajęta przez inną nie-odwołaną lekcję, funkcja zwróci błąd z imieniem ucznia zajmującego slot — poproś wtedy użytkownika o inną datę lub godzinę.',
+            'parameters' => [
+                'type' => 'object',
+                'properties' => [
+                    'lessonId' => [
+                        'type' => 'integer',
+                        'description' => 'ID lekcji do przełożenia'
+                    ],
+                    'newDate' => [
+                        'type' => 'string',
+                        'description' => 'Nowa data lekcji w formacie YYYY-MM-DD'
+                    ],
+                    'newTime' => [
+                        'type' => 'string',
+                        'description' => 'Nowa godzina lekcji w formacie HH:MM (24h)'
+                    ]
+                ],
+                'required' => ['lessonId', 'newDate', 'newTime'],
+            ]
+        ]
     ]
 ];
