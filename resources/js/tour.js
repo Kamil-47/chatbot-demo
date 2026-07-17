@@ -118,7 +118,7 @@ paymentTour.addStep({
     text: "Wybierz miesiąc, aby wyświetlić płatności tylko za ten okres.",
     attachTo: {
         element: ".month-picker",
-        on: "right",
+        on: "bottom",
     },
     buttons: [buttons.back, buttons.next],
 });

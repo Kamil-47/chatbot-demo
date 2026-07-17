@@ -96,6 +96,27 @@
         .btn-logout:hover {
             transform: translateY(-2px);
         }
+
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 32px 20px;
+                border-radius: 12px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .icon-container {
+                width: 80px;
+                height: 80px;
+            }
+
+            .icon-container svg {
+                width: 40px;
+                height: 40px;
+            }
+        }
     </style>
 </head>
 

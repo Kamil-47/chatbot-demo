@@ -27,12 +27,12 @@
             <tbody>
                 @foreach ($studentsData as $student)
                     <tr>
-                        <td><a href="{{ route('student.show', $student['id']) }}" class="student-link">{{ $student['name'] }}</a></td>
-                        <td>{{ $student['total'] }}</td>
-                        <td>{{ $student['completed'] }}</td>
-                        <td>{{ $student['canceled'] }}</td>
-                        <td>{{ $student['planned'] }}</td>
-                        <td>
+                        <td data-label="Uczeń"><a href="{{ route('student.show', $student['id']) }}" class="student-link">{{ $student['name'] }}</a></td>
+                        <td data-label="Lekcji w miesiącu">{{ $student['total'] }}</td>
+                        <td data-label="Odbytych">{{ $student['completed'] }}</td>
+                        <td data-label="Odwołanych">{{ $student['canceled'] }}</td>
+                        <td data-label="Zaplanowanych">{{ $student['planned'] }}</td>
+                        <td data-label="">
                             <a href="{{ route('lesson.show', $student['id']) }}?month={{ $month }}"
                                 class="btn btn-primary">
                                 Zobacz szczegóły

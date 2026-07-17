@@ -129,17 +129,23 @@
             font-size: 14px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 480px) {
             .welcome-container {
-                flex-direction: column;
-            }
-
-            .welcome-sidebar {
-                padding: 40px 30px;
+                border-radius: 12px;
             }
 
             .forms-container {
-                padding: 40px 30px;
+                padding: 20px;
+            }
+
+            .tab {
+                padding: 12px 8px;
+                font-size: 14px;
+            }
+
+            .btn-submit {
+                font-size: 15px;
+                padding: 12px;
             }
         }
     </style>
