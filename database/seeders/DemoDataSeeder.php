@@ -27,8 +27,11 @@ class DemoDataSeeder extends Seeder
         $currentMonth = now()->format('Y-m');
         $previousMonth = now()->subMonth()->format('Y-m');
 
+        $occupiedSlots = [];
+
         foreach (self::NAMES as $name) {
-            $student = Student::factory()->create(['name' => $name]);
+            $schedule = $this->generateUniqueSchedule($occupiedSlots);
+            $student = Student::factory()->create(['name' => $name, 'schedule' => $schedule]);
             $this->seedMonth($student, $previousMonth, isPrevious: true);
             $this->seedMonth($student, $currentMonth, isPrevious: false);
         }
@@ -81,6 +84,36 @@ class DemoDataSeeder extends Seeder
                 ? $startDate->copy()->addDays(rand(5, 25))->format('Y-m-d')
                 : null,
         ]);
+    }
+
+    private function generateUniqueSchedule(array &$occupiedSlots): array
+    {
+        $weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        $times = ['15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00'];
+
+        $allSlots = [];
+        foreach ($weekdays as $day) {
+            foreach ($times as $time) {
+                $key = $day . '_' . $time;
+                if (!in_array($key, $occupiedSlots)) {
+                    $allSlots[] = ['day' => $day, 'time' => $time, 'key' => $key];
+                }
+            }
+        }
+
+        $count = rand(1, 2);
+        $count = min($count, count($allSlots));
+
+        shuffle($allSlots);
+        $chosen = array_slice($allSlots, 0, $count);
+
+        $schedule = [];
+        foreach ($chosen as $slot) {
+            $schedule[$slot['day']] = $slot['time'];
+            $occupiedSlots[] = $slot['key'];
+        }
+
+        return $schedule;
     }
 
     private function determineLessonStatus(Carbon $lessonDate, bool $isPrevious): string
